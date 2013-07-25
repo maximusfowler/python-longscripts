@@ -1,8 +1,7 @@
 
-
 # Python LongScripts : the future of scripts
 
-LongScripts is a simple tool to track how quickly a python script is running and what exceptions it's throwing.
+LongScripts is a simple tool to track how quickly a python script is running and what exceptions it's throwing in real time.
 
 #### Step 1. Start your script
 ```python
@@ -13,7 +12,7 @@ runLongScript(my_iterable, my_function, "My script that takes a long time")
 
 
 #### Step 2. Monitor your script 
-by running longscripts.py from the command line.
+You can check on your script's progress by running ```python longscripts.py``` from the command line.
 
 Example Output
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
