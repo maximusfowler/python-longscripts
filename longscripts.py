@@ -1,11 +1,8 @@
 from traceback import format_exception
-import datetime
 import sys
 import smtplib
-
-from models import *
-import settings
-
+from ls.models import *
+import ls_settings
 
 #### Importable Functions ##############################################################################################
 
@@ -72,9 +69,12 @@ def displaySingleLongScriptProgress(script_id):
     msg += "time passed: " + helperSecondsToReadable(script.getSecondsPassed()) + "\n"
     msg += "time remaining: " + helperSecondsToReadable(script.getSecondsRemaining()) + "\n"
     msg += "------ exceptions ------" + "\n"
-    for k,v in script.getExceptionNumsDictionary().items():
+    exceptions_dict_items = script.getExceptionNumsDictionary().items()
+    for k,v in exceptions_dict_items:
         msg += k + ": " + str(v) + "\n"
-    msg += "------------------------" + "\n"
+    if not exceptions_dict_items:
+        msg += "None\n"
+    msg += "================================================ \n"
     return msg
 
 def displayLongScriptProgress(special_errors=False):
@@ -84,15 +84,16 @@ def displayLongScriptProgress(special_errors=False):
     special_errors : boolean
         Flag which controls whether or not to include section reporting special errors.
     """
-    msg = ''
+    msg = "How are your scripts?\n"
+    msg += "================================================ \n"
     scripts = dbGetAllLongScript()
-    scripts.sort(lambda x: x.start)
+    scripts.sort(key=lambda x: x.start)
     for script in scripts:
         msg += displaySingleLongScriptProgress(script.getUniqueID())
     if special_errors:
         msg += "------ special ------ \n"
         special_errors = dbGetAllLongScriptEvents()
-        special_errors.sort(lambda x: x.which_error)
+        special_errors.sort(key=lambda x: x.which_error)
         for special_error in special_errors:
             msg += str(special_error.which_error) + ": " + str(special_error.num_errors) + "\n"
         msg += "--------------------- \n"
@@ -100,7 +101,7 @@ def displayLongScriptProgress(special_errors=False):
 
 def clearData():
     """
-    Clears all saved longscripts data.
+    Clears all saved ls data.
     """
     clearSavedScripts()
     clearSavedExceptions()
@@ -122,54 +123,71 @@ def helperSecondsToReadable(seconds):
     to_return += str(int(minutes)) + " minutes"
     return to_return
 
-def helperSendEmail(subject, message,to_addr_list=settings.LONGSCRIPTS_EMAIL_RECIPIENTS):
-    from_addr = settings.LONGSCRIPTS_FROM_EMAIL
-    user = settings.LONGSCRIPTS_EMAIL_USER
-    password = settings.LONGSCRIPTS_EMAIL_PASSWORD
-    smtp_server = settings.LONGSCRIPTS_EMAIL_SERVER
+def helperSendEmail(subject, message,to):
+    from_addr = ls_settings.LONGSCRIPTS_FROM_EMAIL
+    user = ls_settings.LONGSCRIPTS_EMAIL_USER
+    password = ls_settings.LONGSCRIPTS_EMAIL_PASSWORD
+    smtp_server = ls_settings.LONGSCRIPTS_EMAIL_SERVER
     header  = 'From: %s\n' % from_addr
-    header += 'To: %s\n' % ','.join(to_addr_list)
+    header += 'To: %s\n' % ','.join(to)
     header += 'Subject: %s\n\n' % subject
     message = header + message
     server = smtplib.SMTP(smtp_server)
     server.starttls()
     server.login(user,password)
-    problems = server.sendmail(from_addr, to_addr_list, message)
+    problems = server.sendmail(from_addr, to, message)
     server.quit()
 
 #### DB Interactions ###################################################################################################
 
 def dbGetAllLongScript():
-    return Script.objects.all()
+    return list(Script.objects.all())
 
 def dbGetLongScriptByID(id):
     return Script.objects.get(id=id)
 
 def dbGetAllLongScriptEvents():
-    return ScriptSpecialError.objects.all()
+    return list(ScriptSpecialError.objects.all())
 
 #### CLI Interface #####################################################################################################
 
-if __name__=="__main__":
-    print str(datetime.datetime.now())
-    args = sys.argv
-    if len(args) > 1:
-        script_id = args[1]
+def cliInterface(args):
+    if "-clear" in args:
+        print "---- Are you sure you want to clear all python-longscript data? [y/n]"
+        while True:
+            yes = {'yes','y', 'ye'}
+            no = {'no','n'}
+            choice = raw_input().lower()
+            if choice in yes:
+               print "---- :$ clearing all data $:"
+               break
+            elif choice in no:
+               print "---- :$ see ya later alligator $:"
+               return False
+            else:
+               sys.stdout.write("Please respond with 'yes' or 'no'")
+        clearData()
+    if "-id" in args:
+        index = args.index("-id")
+        script_id = args[index + 1]
         msg = displaySingleLongScriptProgress(script_id)
     else:
         msg = displayLongScriptProgress()
     if "-email" in args:
         email_alert = True
         index = args.index("-email")
-        if len(args) > index:
+        if len(args)-1 > index:
             email = args[index+1]
             email_recipients = [email]
         else:
-            email_recipients = settings.LONGSCRIPTS_EMAIL_RECIPIENTS
+            email_recipients = ls_settings.LONGSCRIPTS_EMAIL_RECIPIENTS
     else:
         email_alert = False
     if email_alert:
-        email = EmailMessage(subject='Longscripts Update', body=msg, to=email_recipients)
-        email.send()
+        helperSendEmail(subject='python-longscripts update', message=msg, to=email_recipients)
     else:
         print msg
+
+if __name__=="__main__":
+    args = sys.argv
+    cliInterface(args)

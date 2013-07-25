@@ -3,8 +3,8 @@ from functools import partial
 import random
 from longscripts import runLongScript
 
-# run this file as an example of how longscripts works
-print "longscripts example:"
+# run this file as an example of how ls works
+print "ls example:"
 
 # random function which takes a few minutes to run and throws an occasional enigma exception
 def arbitraryMachine(number, cool_numbers, shitty_numbers):
@@ -29,4 +29,4 @@ items = numbers
 # run the script using runScript from longscript.monitor_script
 runLongScript(name="arbitraryMachine", items=items, item_fun=item_fun)
 
-# open up another shell and run alert_script_progress.sh to monitor the progress of the script while its running
+# open up another shell and run python longscripts.py to monitor the progress of the script while its running
