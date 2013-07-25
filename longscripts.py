@@ -6,7 +6,7 @@ import ls_settings
 
 #### Importable Functions ##############################################################################################
 
-def runLongScript(name, items, item_fun, resolution=5):
+def runLongScript(items, item_fun, name="My LongScript", resolution=5):
     """
     runs inputted function on every item in inputted iterable,
     storing how much progress the script has made and all the exceptions that are thrown
@@ -160,7 +160,7 @@ def cliInterface(args):
             choice = raw_input().lower()
             if choice in yes:
                print "---- :$ clearing all data $:"
-               break
+               return True
             elif choice in no:
                print "---- :$ see ya later alligator $:"
                return False
