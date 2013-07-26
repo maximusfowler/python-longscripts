@@ -1,4 +1,3 @@
-
 # Python LongScripts : the future of scripts
 
 LongScripts is a simple tool to track how quickly a python script is running and what exceptions it's throwing in real time.
@@ -28,6 +27,23 @@ time remaining: 0 minutes
 <type 'exceptions.KeyboardInterrupt'>: 5
 <class '__main__.EnigmaException'>: 5
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#### :$ Advanced Features $:
+
+##### Email alerts
+
+Configure your smtp email settings in ls_settings.py or by setting environmental variables.
+- LONGSCRIPTS_EMAIL_RECIPIENT
+- LONGSCRIPTS_EMAIL_SERVER
+- LONGSCRIPTS_EMAIL_USER
+- LONGSCRIPTS_EMAIL_PASSWORD
+
+Use the -email flag to have longscripts send its output to the default email recipients configured in your settings or to the optionally supplied email address.
+```python longscripts.py -email [email_address]``` 
+
+##### Clear data
+
+```python longscripts.py -clear``` will clear all saved longscripts data.
 
 
 
