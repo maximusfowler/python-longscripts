@@ -1,7 +1,7 @@
 from traceback import format_exception
 import sys
 import smtplib
-from ls.models import *
+from longscripts.models import *
 import ls_settings
 
 #### Importable Functions ##############################################################################################
@@ -101,7 +101,7 @@ def displayLongScriptProgress(special_errors=False):
 
 def clearData():
     """
-    Clears all saved ls data.
+    Clears all saved longscripts data.
     """
     clearSavedScripts()
     clearSavedExceptions()
@@ -152,6 +152,7 @@ def dbGetAllLongScriptEvents():
 #### CLI Interface #####################################################################################################
 
 def cliInterface(args):
+    # clear data
     if "-clear" in args:
         print "---- Are you sure you want to clear all python-longscript data? [y/n]"
         while True:
@@ -167,24 +168,24 @@ def cliInterface(args):
             else:
                sys.stdout.write("Please respond with 'yes' or 'no'")
         clearData()
+    # display progress of single script
     if "-id" in args:
         index = args.index("-id")
         script_id = args[index + 1]
         msg = displaySingleLongScriptProgress(script_id)
+    # default is display progress of all scripts
     else:
         msg = displayLongScriptProgress()
+    # render message via email
     if "-email" in args:
-        email_alert = True
         index = args.index("-email")
         if len(args)-1 > index:
             email = args[index+1]
             email_recipients = [email]
         else:
             email_recipients = ls_settings.LONGSCRIPTS_EMAIL_RECIPIENTS
-    else:
-        email_alert = False
-    if email_alert:
         helperSendEmail(subject='python-longscripts update', message=msg, to=email_recipients)
+    # render message via printing to command line by default
     else:
         print msg
 
